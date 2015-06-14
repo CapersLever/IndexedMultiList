@@ -170,17 +170,6 @@ int IndexedMultiList::removeIndex(int index) {
 	return removed;
 }
 
-//bool IndexedMultiList::shiftRemove(int index) {
-//	if (arr[index].letter == NULL) { return false; } //checking valid
-//	for (int i = index; i < DEFAULT_MAX_ITEMS - 2; i++) {
-//		arr[i] = arr[i + 1];
-//	}
-//	arr[DEFAULT_MAX_ITEMS].letter = NULL;
-//	arr[DEFAULT_MAX_ITEMS].number = NULL;
-//	usedSize--;
-//	return true;
-//}
-
 int IndexedMultiList::removeAll(char val) {
 	int index = find(val); //finding index to remove all from
 	if (index != -1) //checking if found
