@@ -1,2 +1,3 @@
 # IndexedMultiList
-C++ implementation of IML
+C++ implementation of Indexed Multi List
+Using pointers as underlying data structure
