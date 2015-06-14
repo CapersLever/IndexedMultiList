@@ -1,180 +1,213 @@
-#include "IndexedMultiList.h"
 #include <iostream>
+#include "IndexedMultiList.h"
 using namespace std;
 
 IndexedMultiList::IndexedMultiList() {
+	head = NULL;
 	usedSize = 0;
-	for (int i = 0; i < DEFAULT_MAX_ITEMS; i++) { //array full of NULL values
-		arr[i].letter = NULL;
-		arr[i].number = NULL;
-	}
 }
 
 bool IndexedMultiList::insert(int index, char val, int count) {
-	if (index >= DEFAULT_MAX_ITEMS) { return false; }
-	if (usedSize == DEFAULT_MAX_ITEMS) { return false; } //the list is full
-	if (index > usedSize + 1) { return false; } //when index is more than the filled spots in the array
-	if (index < 0) { return false; } //invalid index
-	
-	if (usedSize == 0 && index == 0) { //list is empty insert into first spot
-		arr[0].letter = val;
-		arr[0].number = count;
-		usedSize++; //increases the amont of used spaces 
-		return true; //this insert is done and should only run when lst is empty
-	}	
-
-	if (index == 0) { //inserting into the front of the list
-		for (int i = DEFAULT_MAX_ITEMS - 1; i > 0; i--) { //shifts all forward one
-			arr[i] = arr[i - 1];
-		}
-		arr[0].letter = val; //inserts into the first spot
-		arr[0].number = count;
+	if (index < 0) { return false; }
+	if (head == NULL) { //first time inserting into list
+		head = new Node(val, count);
 		usedSize++;
 		return true;
 	}
-
-	if (index == usedSize) { //for inserting into the next spot but not the end of the array
-		arr[usedSize].letter = val;
-		arr[usedSize].number = count;
+	if (index == 0) {
+		Node *cur = new Node(val, count, head); //making new head with next pointer to head
+		head = cur; //setting new head
 		usedSize++;
 		return true;
 	}
-	//default or middle of list input
-	int loop = DEFAULT_MAX_ITEMS - 1;
-	for (loop; loop > index; loop--) { //stops one before the changed index
-		arr[loop] = arr[loop - 1];
-	}
-	arr[loop].letter = val;
-	arr[loop].number = count;
-	usedSize++;
-	return true;
-}
-
-void IndexedMultiList::print() const{
-	for (int i = 0; i < DEFAULT_MAX_ITEMS; i++) {
-		if (arr[i].letter != NULL) {
-			cout << arr[i].number << " " << arr[i].letter << endl;
+	if (index == usedSize) { //inserts into the end when usedSize is 2,
+		Node *cur = head;    //then the index 2 would be the last spot
+		while (cur->next != NULL) {
+			cur = cur->next;
 		}
-	}
-}
-
-bool IndexedMultiList::empty() const {
-	for (int i = 0; i < DEFAULT_MAX_ITEMS - 1; i++) {
-		if (arr[i].letter != NULL) { //when arr[i] is empty
-			return false;            // will return true
-		}
-	}
-	return true; //assuming list will be empty more than full
-}
-
-int IndexedMultiList::uniqueSize() const {
-	return usedSize; //keeping track of this var in remove and insert methods
-}
-
-int IndexedMultiList::size() const {
-	int total = 0;
-	for (int i = 0; i < DEFAULT_MAX_ITEMS; i++) {
-		total = total + arr[i].number; //count of total number in all spots of arr
-	}
-	return total;
-}
-
-int IndexedMultiList::find(char val) const {
-	for (int i = 0; i < DEFAULT_MAX_ITEMS; i++) {
-		if (arr[i].letter == val)
-			return i; //return index found
-	}
-	return -1; //return -1 if nt found
-}
-
-int IndexedMultiList::countItem(char val) const {
-	int count = 0;
-	for (int i = 0; i < DEFAULT_MAX_ITEMS; i++) {
-		if (arr[i].letter == val) //count times found in list
-			count++;
-	}
-	return count;
-}
-
-int IndexedMultiList::totalItemCount(char val) const {
-	int total = 0;
-	for (int i = 0; i < DEFAULT_MAX_ITEMS; i++) {
-		if (arr[i].letter == val) {
-			total = total + arr[i].number; //simple loop count
-		}
-	}
-	return total;
-}
-
-int IndexedMultiList::countPosition(int index) const {
-	if (index > usedSize || index > DEFAULT_MAX_ITEMS - 1) { return arr[0].number; } //invalid index values return value out of first pos
-	return arr[index].number; //eturn the number at index
-}
-
-bool IndexedMultiList::getAt(int index, char &out) const {
-	if (arr[index].letter == NULL) { return false; } //checking valid
-	else {
-		out = arr[index].letter; //setting out
+		cur->next = new Node(val, count);
+		usedSize++;
 		return true;
 	}
-}
-
-bool IndexedMultiList::update(char val, int amount) {
-	for (int i = 0; i < DEFAULT_MAX_ITEMS; i++) {
-		if (arr[i].letter == val) {
-			arr[i].number = arr[i].number + amount; //updating number
-			return true;
-		}
+	if (index > 0){ //normal case. middle of list insert
+		Node *cur = head;
+		int counter = 1;
+		while (counter != index) {
+			cur = cur->next;
+			counter++;
+		} //cur next will be index to insert into 
+		Node *pt2me = cur->next;
+		cur->next = new Node(val, count, pt2me);
+		usedSize++;
+		return true;
 	}
 	return false;
 }
 
-bool IndexedMultiList::change(int index, int amount) {
-	if (index < 0 || index > usedSize || index >= DEFAULT_MAX_ITEMS) { return false; } //checking valididty
-	arr[index].number = arr[index].number + amount; //changing index
-	if (arr[index].number <= 0) { //checking if no more values exist after change
-		removeIndex(index); //calling to shift arr
+void IndexedMultiList::print() const {
+	Node *cur = head;
+	while (cur != NULL) {
+		cout << cur->data << " " << cur->number << endl;
+		cur = cur->next;
 	}
-	return true;
-}
-
-bool IndexedMultiList::remove(char val) {
-	int index = find(val); //so only run once
-	if (index != -1) { 
-		arr[index].number = arr[index].number - 1; //
-	}
-	else
-		return false; //find did not find val in list
-	if (arr[index].number <= 0) {
-		removeIndex(index); //calling if number is below 0
-	}
-	return true;
 }
 
 int IndexedMultiList::removeIndex(int index) {
-	if (index >= DEFAULT_MAX_ITEMS) { return false; }
-	if (arr[index].letter == NULL) { return -1; } //checking valid
-	int removed = arr[index].number; //to keep how many items were removed
-	if (index == DEFAULT_MAX_ITEMS - 1) {
-		arr[DEFAULT_MAX_ITEMS - 1].letter = NULL;
-		arr[DEFAULT_MAX_ITEMS -1].number = NULL;
+	if (index < 0 || index > usedSize - 1) { return -1; } //checking valid indicies
+	int removed = 0;
+	if (index == 0) { //special case to remove the head
+		removed = head->data;
+		Node *cur = head;
+		head = head->next; //new head
+		delete cur;
 		usedSize--;
 		return removed;
 	}
-	for (int i = index; i < DEFAULT_MAX_ITEMS - 1; i++) {
-		arr[i] = arr[i + 1];
+	Node *cur = head;
+	int counter = 0;
+	while (counter != index - 1) { //one before the index to remove
+		cur = cur->next;
+		counter++;
 	}
-	arr[DEFAULT_MAX_ITEMS - 1].letter = NULL;
-	arr[DEFAULT_MAX_ITEMS - 1].number = NULL;
+	removed = cur->next->number; //return value; cur next is being deleted
+	Node *kill = cur->next;      //kill now cur->next
+	cur->next = kill->next;      //setting pointers up 
+	delete kill;
 	usedSize--;
 	return removed;
 }
 
+bool IndexedMultiList::remove(char val) {
+	Node *cur = head;
+	int index = 0;
+	while (cur->data != val) {
+		cur = cur->next;
+		index++; //keeping track of the index cur is at for removal
+	}
+	if (cur == NULL) { return false; }
+	cur->number--;
+	if (cur->number < 1) {
+		removeIndex(index); //using that index to remove
+	}
+	return true;
+}
+
 int IndexedMultiList::removeAll(char val) {
-	int index = find(val); //finding index to remove all from
-	if (index != -1) //checking if found
-		return removeIndex(index); //giving the index to removeIndex
-	//will shift the arr and return amount of items removed
-	else
-		return 0; //no items removed, no items found
+	int removed = 0;
+	if (head->data == val) {
+		removed = head->number;
+		removeIndex(0);
+		return removed;
+	}
+	int index = 0;
+	Node *cur = head;
+	while (cur != NULL && cur->data != val) {
+		cur = cur->next;
+		index++;
+	}
+	removed = cur->number;
+	removeIndex(index);
+	return removed;
+}
+
+int IndexedMultiList::uniqueSize() const {
+	return usedSize;
+}
+
+bool IndexedMultiList::change(int index, int amount) {
+	if (index < 0 || index > usedSize - 1) { return false; } //checking valid indicies
+	Node *cur = head;
+	int count = 0; //for passing removeIndex the index of cur w/o looping again
+	while (count != index) {
+		cur = cur->next;
+		count++;         
+	}
+	cur->number += amount; 
+	if (cur->number <= 0) { //if no more vals left remove with index
+		removeIndex(index);
+	}
+	return true;
+}
+
+bool IndexedMultiList::update(char val, int amount) {
+	int index = find(val);               //saving to only call find once
+	if (index == -1) { return false; }   //checking if val was found in list
+	Node *cur = head;
+	for (int i = 0; i < index; i++) {    //saving value of index for later so ussing i so not to corrupt index
+		cur = cur->next;
+	}
+	cur->number += amount;               //adding amount to val
+	if (cur->number <= 0) {              //removing if no more of val left
+		removeIndex(index);
+		return true;
+	}
+	return true;
+}
+
+int IndexedMultiList::find(char val) const {
+	Node *cur = head;
+	int index = 0;
+	while (cur != NULL && cur->data != val) {
+		cur = cur->next;
+		index++;
+	}
+	if (cur == NULL) { return -1; } //checking what argument broke the loop
+	return index;
+}
+
+int IndexedMultiList::countPosition(int index) const {
+	if (index < 0 || index > usedSize - 1) { return -1; } //valid indicies check
+	Node *cur = head;
+	while (index != 0) { //going to count down from index while moving cur up list
+		cur = cur->next;
+		index--;
+	}
+	int count = cur->number;
+	return count;
+}
+
+int IndexedMultiList::totalItemCount(char val) const {
+	Node *cur = head;
+	int count = 0;
+	while (cur != NULL) {
+		if (cur->data == val) {
+			count += cur->number;
+		}
+		cur = cur->next;
+	}
+	return count;
+}
+
+int IndexedMultiList::countItem(char val) const {
+	Node *cur = head;
+	int count = 0;
+	while (cur != NULL) {
+		if (cur->data == val) {
+			count++;
+		}
+		cur = cur->next;
+	}
+	return count;
+}
+
+int IndexedMultiList::size() const {
+	Node *cur = head;
+	int size = 0;
+	while (cur != NULL) {
+		size += cur->number;
+		cur = cur->next;
+	}
+	return size;
+}
+
+bool IndexedMultiList::getAt(int index, char &out) const {
+	if (index < 0 || index > usedSize - 1) { return false; }
+	Node *cur = head;
+	while (cur != NULL && index != 0) {
+		cur = cur->next;
+		index--;
+	}
+	if (cur == NULL) { return false; }
+	out = cur->data;
+	return true;
 }
