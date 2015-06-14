@@ -1,25 +1,21 @@
 #ifndef IML_H
 #define IML_H
-const int DEFAULT_MAX_ITEMS = 20;
 
 class IndexedMultiList {
 public:
 	//Constructors/destructors
 	IndexedMultiList();//creates an empty list capable of storing 
 	//DEFAULT_MAX_ITEMS items
-	
+	//~IndexedMultiList();	//destructor ONLY if needed
 
 	//accessors
 	bool empty() const;//returns true iff (if and only if) list is empty
 	int uniqueSize() const;//returns number of positions in the list in use
 	int size() const;	//returns total number of items in list using counts
-
 	//If 2 A, 3 C, 1 D are inserted into an IndexedMultiList iml then 
 	//iml.uniqueSize() would return 3 and iml.size() would return 6.
-
 	int find(char val) const;
 	//returns index of first position with val in it or –1 if not found
-
 	int countItem(char val) const;
 	//returns number of locations val is in the list (vacuously 0 if not found)
 	int totalItemCount(char val) const;
@@ -61,12 +57,19 @@ public:
 	//multiple locations it should remove only the first location
 
 private:
+	//bool shiftRemove(int index);
 	struct Node {
-		char letter;
+		Node(char d, int n, Node *nex = 0) {
+			data = d;
+			number = n;
+			next = nex;
+		}
+		char data;
 		int number;
+		Node *next;
 	};
-	int usedSize; //the current amount of the DEFUALT_MAX_ITEMS being used
-	Node arr[DEFAULT_MAX_ITEMS];
+	Node *head;
+	int usedSize;
 	//put whatever methods or data you need in here, 
 	//you must put the 1-dimensional array here
 };
