@@ -1,3 +1,12 @@
+/*
+Capers Lever
+Indexed Multi List
+Creation Date: 9/16/2014
+Last Modified: 4/9/2016
+CSCI 315 Data Structures
+Grade Received: 85
+Comments: Developed using Visual Studio. Copy and paste into new Visual Studio project and run.
+*/
 #include <iostream>
 #include "IndexedMultiList.h"
 using namespace std;
